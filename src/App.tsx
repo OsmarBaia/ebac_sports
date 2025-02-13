@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { carregarProdutos } from './store/reducers/produtos'
+import { adicionar as adicionarAoCarrinho } from './store/reducers/carrinho'
+import { adicionar as favoritarProduto } from './store/reducers/favoritos'
+
 import Header from './components/Header'
 import Produtos from './containers/Produtos'
 
 import { GlobalStyle } from './styles'
+import { RootReducer } from './store'
 
 export type Produto = {
   id: number
@@ -12,36 +18,35 @@ export type Produto = {
 }
 
 function App() {
-  const [produtos, setProdutos] = useState<Produto[]>([])
-  const [carrinho, setCarrinho] = useState<Produto[]>([])
-  const [favoritos, setFavoritos] = useState<Produto[]>([])
+  const dispatch = useDispatch()
+
+  // Pegando produtos do Redux
+  const produtos = useSelector((state: RootReducer) => state.produtos.itens)
 
   useEffect(() => {
     fetch('https://fake-api-tau.vercel.app/api/ebac_sports')
       .then((res) => res.json())
-      .then((res) => setProdutos(res))
-  }, [])
+      .then((res) => dispatch(carregarProdutos(res)))
+  }, [dispatch])
 
+  function adicionarProdutoAoCarrinho(produto: Produto) {
+    dispatch(adicionarAoCarrinho(produto))
+  }
 
   function favoritar(produto: Produto) {
-    if (favoritos.find((p) => p.id === produto.id)) {
-      const favoritosSemProduto = favoritos.filter((p) => p.id !== produto.id)
-      setFavoritos(favoritosSemProduto)
-    } else {
-      setFavoritos([...favoritos, produto])
-    }
+    dispatch(favoritarProduto(produto))
   }
 
   return (
     <>
       <GlobalStyle />
       <div className="container">
-        <Header favoritos={favoritos} itensNoCarrinho={carrinho} />
+        <Header />
         <Produtos
           produtos={produtos}
-          favoritos={favoritos}
           favoritar={favoritar}
-          adicionarAoCarrinho={adicionarAoCarrinho}
+          adicionarAoCarrinho={adicionarProdutoAoCarrinho}
+          favoritos={[]}
         />
       </div>
     </>
