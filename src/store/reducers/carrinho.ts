@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Produto } from '../../App'
+import { Produto } from '../../types'
 
-type ProdutoState = {
+type CarrinhoState = {
   itens: Produto[]
 }
 
-const initialState: ProdutoState = {
+const initialState: CarrinhoState = {
   itens: []
 }
 
@@ -17,7 +17,7 @@ const carrinhoSlice = createSlice({
       const produto = action.payload
 
       if (state.itens.find((p) => p.id === produto.id)) {
-        alert('Produto ja adicionado')
+        alert('Produto já adicionado')
       } else {
         state.itens.push(produto)
       }

@@ -1,6 +1,5 @@
-import { useEffect } from 'react'
+import { useGetProdutosQuery } from './services/api'
 import { useDispatch, useSelector } from 'react-redux'
-import { carregarProdutos } from './store/reducers/produtos'
 import { adicionar as adicionarAoCarrinho } from './store/reducers/carrinho'
 import { adicionar as favoritarProduto } from './store/reducers/favoritos'
 
@@ -8,26 +7,14 @@ import Header from './components/Header'
 import Produtos from './containers/Produtos'
 
 import { GlobalStyle } from './styles'
+import { Produto } from './types'
 import { RootReducer } from './store'
-
-export type Produto = {
-  id: number
-  nome: string
-  preco: number
-  imagem: string
-}
 
 function App() {
   const dispatch = useDispatch()
+  const favoritos = useSelector((state: RootReducer) => state.favoritos.itens)
 
-  // Pegando produtos do Redux
-  const produtos = useSelector((state: RootReducer) => state.produtos.itens)
-
-  useEffect(() => {
-    fetch('https://fake-api-tau.vercel.app/api/ebac_sports')
-      .then((res) => res.json())
-      .then((res) => dispatch(carregarProdutos(res)))
-  }, [dispatch])
+  const { data: produtos, isLoading, error } = useGetProdutosQuery()
 
   function adicionarProdutoAoCarrinho(produto: Produto) {
     dispatch(adicionarAoCarrinho(produto))
@@ -42,12 +29,16 @@ function App() {
       <GlobalStyle />
       <div className="container">
         <Header />
-        <Produtos
-          produtos={produtos}
-          favoritar={favoritar}
-          adicionarAoCarrinho={adicionarProdutoAoCarrinho}
-          favoritos={[]}
-        />
+        {isLoading && <p>Carregando produtos...</p>}
+        {error && <p>Erro ao carregar os produtos.</p>}
+        {produtos && (
+          <Produtos
+            produtos={produtos}
+            favoritar={favoritar}
+            adicionarAoCarrinho={adicionarProdutoAoCarrinho}
+            favoritos={favoritos}
+          />
+        )}
       </div>
     </>
   )
